@@ -25,4 +25,6 @@ return [
     'log_write'    => [],
     // 应用结束
     'app_end'      => [],
+    //后台模块初始化
+    'admin_init' =>  ['app\\admin\\behavior\\Authorize'],
 ];

@@ -15,7 +15,11 @@ class Base extends Controller{
      * 初始化的方法
      */
     public function _initialize() {
+        Hook::listen('admin_init');
+
     }
+
+
 
 
 }

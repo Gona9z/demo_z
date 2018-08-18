@@ -3,8 +3,12 @@ namespace app\admin\controller;
 
 class Index extends Base{
 
+    /**
+     * @description : [后台首页]
+     * @author : [zhuangze]
+     * @return mixed
+     */
     public function index(){
-        //halt(session(config('admin.session_user'), '', config('admin.session_user_scope')));
         return $this->fetch();
     }
 

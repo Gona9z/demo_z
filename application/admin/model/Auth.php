@@ -7,7 +7,9 @@
  */
 namespace app\admin\model;
 
-class Auth extends Base {
+use think\Model;
+
+class Auth extends Model {
 
     //权限状态
     const STATUS_DENY = '0';//禁用
@@ -153,7 +155,7 @@ class Auth extends Base {
     {
         $auth = $this->_parent_auth;
         if(is_null( $this->_parent_auth )) {
-            $auth = self::find()->select( 'path' )->where( [ 'id' => $this->pid ] )->asArray()->one();
+            $auth = $this->select( 'path' )->where( [ 'id' => $this->pid ] )->asArray()->find();
         }
         return $auth;
     }
@@ -172,7 +174,7 @@ class Auth extends Base {
         $path = $this->_parent_path;
         if(is_null( $path )) {
             if($this->pid > 0) {
-                $auth = self::find()->select( 'path' )->where( [ 'id' => $this->pid ] )->asArray()->one();
+                $auth = $this->select( 'path' )->where( [ 'id' => $this->pid ] )->asArray()->find();
                 $path = $auth['path'];
             } else {
                 $path = '0';
@@ -227,7 +229,7 @@ class Auth extends Base {
                 $this->updateAttributes( [ 'path' => '0-' . $this->getPrimaryKey() ] );//保存path
             } elseif($this->getScenario() == self::SCENARIO_CREATE) {
                 //创建普通子菜单时，要先将父级的pid找出，然后再拼接更新path
-                $parent = self::find()->select( 'path' )->where( [ 'id' => $this->pid, 'status' => self::STATUS_ON ] )->asArray()->one();
+                $parent = $this->select( 'path' )->where( [ 'id' => $this->pid, 'status' => self::STATUS_ON ] )->asArray()->find();
                 $this->updateAttributes( [ 'path' => $parent['path'] . '-' . $this->getPrimaryKey() ] );//保存path
             }
         } else {
@@ -269,20 +271,20 @@ class Auth extends Base {
         return $arr;
     }
 
-    public function beforeDelete()
-    {
-        if(!parent::beforeDelete()) {
-            return false;
-        }
-        $auths = Auth::find()->select( [ 'id', 'pid' ] )->asArray()->all();
-        //查一下是否有子级
-        if(empty( $this->getAllSonIds( $auths, $this->id ) )) {
-            $this->setHasSon( false );
-        } else {
-            $this->setHasSon( true );
-        }
-        return true;
-    }
+//    public function beforeDelete()
+//    {
+//        if(!parent::beforeDelete()) {
+//            return false;
+//        }
+//        $auths = Auth::find()->select( [ 'id', 'pid' ] )->asArray()->all();
+//        //查一下是否有子级
+//        if(empty( $this->getAllSonIds( $auths, $this->id ) )) {
+//            $this->setHasSon( false );
+//        } else {
+//            $this->setHasSon( true );
+//        }
+//        return true;
+//    }
 
     /**
      * @var [是否有子级]
@@ -306,16 +308,16 @@ class Auth extends Base {
     }
 
 
-    public function afterDelete()
-    {
-        parent::afterDelete();
-
-        //删除对应关系（权限和角色关系），删除所有子级
-        if($this->getHasSon() && !(self::deleteAll( [ 'in', 'id', $this->getSonAuthsIds() ] ) > 0)) {
-            throw new \Exception();
-        }
-        $this->delRoleAuth();//删除角色和权限的关系
-    }
+//    public function afterDelete()
+//    {
+//        parent::afterDelete();
+//
+//        //删除对应关系（权限和角色关系），删除所有子级
+//        if($this->getHasSon() && !(self::deleteAll( [ 'in', 'id', $this->getSonAuthsIds() ] ) > 0)) {
+//            throw new \Exception();
+//        }
+//        $this->delRoleAuth();//删除角色和权限的关系
+//    }
 
     /**
      * @use          [删除角色和权限对应关系]
